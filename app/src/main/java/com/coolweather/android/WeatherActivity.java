@@ -2,6 +2,9 @@ package com.coolweather.android;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 import android.content.SharedPreferences;
 import android.graphics.Color;
@@ -12,6 +15,7 @@ import android.preference.PreferenceManager;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ScrollView;
@@ -31,7 +35,9 @@ import okhttp3.Callback;
 import okhttp3.Response;
 
 public class WeatherActivity extends AppCompatActivity {
-
+    public  DrawerLayout  drawerLayout;
+    private Button  navButton;
+    public SwipeRefreshLayout swipeRefreshLayout;
     private ScrollView weatherLayout;
     private TextView  titleCity;
     private  TextView  titleUpdateTime;
@@ -66,18 +72,22 @@ public class WeatherActivity extends AppCompatActivity {
         comfortText=findViewById(R.id.comfort_text);
         carWashText=findViewById(R.id.car_wash_text);
         sportText=findViewById(R.id.sport_text);
+        swipeRefreshLayout=findViewById(R.id.swipe_refresh);
+
         SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString=sharedPreferences.getString("weather",null);
+        final  String weatherId;
         if(weatherString!=null)
 
             //有缓存直接解析天气数据
         {
             Weather weather = Utilty.handleWeatherResponse(weatherString);
+            weatherId=weather.basic.weatherId;
             showWeatherInfo(weather);
         }else{
 
             //无缓存时去服务器查询天气
-            String weatherId=getIntent().getStringExtra("weather_id");
+            weatherId=getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
@@ -88,7 +98,20 @@ public class WeatherActivity extends AppCompatActivity {
         }else{
              loadBingPic();
         }
-
+       swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+           @Override
+           public void onRefresh() {
+               requestWeather(weatherId);
+           }
+       });
+        drawerLayout=findViewById(R.id.drawer_layout);
+        navButton=findViewById(R.id.nav_button);
+        navButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                drawerLayout.openDrawer(GravityCompat.START);
+            }
+        });
     }
 
     private void loadBingPic() {
@@ -118,8 +141,9 @@ public class WeatherActivity extends AppCompatActivity {
 
     }
 
-    private void requestWeather(String weatherId) {
+    public  void requestWeather(String weatherId) {
         String url="http://guolin.tech/api/weather?cityid="+weatherId+"&key=3725fc9dbb8c4d7489566d8580ec0fc4";
+        Log.d("Weather",url);
         HttpUtil.sendRquest(url, new Callback() {
             @Override
             public void onFailure(@NonNull Call call, @NonNull IOException e) {
@@ -127,6 +151,7 @@ public class WeatherActivity extends AppCompatActivity {
                     @Override
                     public void run() {
                         Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
+                        swipeRefreshLayout.setRefreshing(false);  //结束刷新
                     }
                 });
             }
@@ -147,12 +172,13 @@ public class WeatherActivity extends AppCompatActivity {
                            }else{
                                Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                            }
+                           swipeRefreshLayout.setRefreshing(false);  //结束刷新
                        }
                    });
 
             }
         });
-        loadBingPic();
+
     }
 
     private void  showWeatherInfo(Weather weather){
