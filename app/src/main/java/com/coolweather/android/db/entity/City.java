@@ -19,6 +19,9 @@ public class City {
     private  int provinceId;
 
 
+    private  String weatherId;
+
+
 
     public int getId() {
         return id;
@@ -51,5 +54,14 @@ public class City {
 
     public void setProvinceId(int provinceId) {
         this.provinceId = provinceId;
+    }
+
+    @NonNull
+    public String getWeatherId() {
+        return weatherId;
+    }
+
+    public void setWeatherId(@NonNull String weatherId) {
+        this.weatherId = weatherId;
     }
 }

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
@@ -33,7 +34,10 @@ public class AutoUpdateService extends Service {
         int anHour=8*60*60*1000;  //8小时的毫秒数
         long triggerAttime= SystemClock.elapsedRealtime()+anHour;  //系统开机时间向后移8小时
         Intent  i=new Intent(this,AutoUpdateService.class);
-        PendingIntent pendingIntent=PendingIntent.getService(this,0,intent,0);
+        PendingIntent pendingIntent;
+
+            pendingIntent=PendingIntent.getService(this,0,intent,PendingIntent.FLAG_MUTABLE);
+
         alarmManager.cancel(pendingIntent);
         alarmManager.set(AlarmManager.ELAPSED_REALTIME_WAKEUP,triggerAttime,pendingIntent);
         return super.onStartCommand(intent, flags, startId);

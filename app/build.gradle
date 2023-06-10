@@ -43,4 +43,11 @@ dependencies {
     implementation 'com.squareup.okhttp3:okhttp:4.9.3'
     implementation 'androidx.swiperefreshlayout:swiperefreshlayout:1.1.0'
     implementation 'androidx.drawerlayout:drawerlayout:1.1.0'
+    //腾讯定位
+    implementation 'com.tencent.map.geolocation:TencentLocationSdk-openplatform:7.2.8'
+    //腾讯地图
+    implementation 'com.tencent.map:tencent-map-vector-sdk:4.3.9.9'
+    //地图组件库
+    implementation 'com.tencent.map:sdk-utilities:1.0.6'
+
 }

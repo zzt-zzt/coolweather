@@ -29,7 +29,7 @@ public class Utilty {
     private  static CountyDao countyDao;
 
     static{
-        positionDatabase=WeatherApplication.getInstance().getPositionDatabase();
+        positionDatabase=PositionDatabase.getInstance(WeatherApplication.mContext);
         provinceDao=positionDatabase.provinceDao();
         cityDao=positionDatabase.cityDao();
         countyDao=positionDatabase.countyDao();
@@ -72,7 +72,7 @@ public class Utilty {
                        city.setCityCode(cityObject.getInt("id"));
                        city.setCityName(cityObject.getString("name"));
                        city.setProvinceId(ProvinceId);
-                        cityDao.insert(city);
+                       cityDao.insert(city);
 
 
                    }
@@ -86,29 +86,32 @@ public class Utilty {
            return  false;
     }
 
-    public  static boolean handleCountyResponse(String response,int cityId){
+    public  static String  handleCountyResponse(String response,int cityId,String cityName){
+           String weatherId="";
            if(!TextUtils.isEmpty(response)){
 
                try {
                    JSONArray AllCounty=new JSONArray(response);
                    for(int i=0;i<AllCounty.length();i++){
                           JSONObject countyObject=AllCounty.getJSONObject(i);
-                       County county=new County();
-                       county.setCountyCode(countyObject.getInt("id"));
-                       county.setCountyName(countyObject.getString("name"));
-                       county.setWeatherId(countyObject.getString("weather_id"));
-                       county.setCityId(cityId);
+                          if(countyObject.getString("name").equals(cityName)){
+                                City city=cityDao.getCityByName(cityName);
+                                weatherId=countyObject.getString("weather_id");
+                                city.setWeatherId(weatherId);
+                                cityDao.updateCity(city);
+                                break;
+                          }
 
-                       countyDao.insert(county);
+
 
                    }
-                   return   true;
+                   return   weatherId;
 
                } catch (JSONException e) {
                    e.printStackTrace();
                }
            }
-           return  false;
+           return  null;
     }
 
     public   static Weather handleWeatherResponse(String  response){

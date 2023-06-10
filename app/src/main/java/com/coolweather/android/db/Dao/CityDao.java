@@ -4,6 +4,7 @@ import androidx.room.Dao;
 import androidx.room.Insert;
 import androidx.room.OnConflictStrategy;
 import androidx.room.Query;
+import androidx.room.Update;
 
 import com.coolweather.android.db.entity.City;
 
@@ -23,5 +24,13 @@ public interface CityDao {
 
     @Query("delete  from City  where 1=1")
     void deleteAll();
+
+
+    @Query("select * from City where cityName=:cityName")
+    City  getCityByName(String cityName);
+
+
+    @Update(onConflict =  OnConflictStrategy.REPLACE)   //出现重复记录时替换原记录
+    int  updateCity(City city);
 
 }

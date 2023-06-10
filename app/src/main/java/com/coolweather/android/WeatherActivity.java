@@ -78,18 +78,18 @@ public class WeatherActivity extends AppCompatActivity {
 
         SharedPreferences sharedPreferences= PreferenceManager.getDefaultSharedPreferences(this);
         String weatherString=sharedPreferences.getString("weather",null);
-        final  String weatherId;
+
         if(weatherString!=null)
 
             //有缓存直接解析天气数据
         {
             Weather weather = Utilty.handleWeatherResponse(weatherString);
-            weatherId=weather.basic.weatherId;
+            String weatherId=weather.basic.weatherId;
             showWeatherInfo(weather);
         }else{
 
             //无缓存时去服务器查询天气
-            weatherId=getIntent().getStringExtra("weather_id");
+            String weatherId=getIntent().getStringExtra("weather_id");
             weatherLayout.setVisibility(View.INVISIBLE);
             requestWeather(weatherId);
         }
@@ -103,7 +103,10 @@ public class WeatherActivity extends AppCompatActivity {
        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
            @Override
            public void onRefresh() {
-               requestWeather(weatherId);
+               SharedPreferences sharedPreferences=PreferenceManager.getDefaultSharedPreferences(WeatherActivity.this);
+               String WeatherText=sharedPreferences.getString("weather",null);
+               Weather weather=Utilty.handleWeatherResponse(WeatherText);
+               requestWeather(weather.basic.weatherId);
            }
        });
         drawerLayout=findViewById(R.id.drawer_layout);
@@ -162,7 +165,7 @@ public class WeatherActivity extends AppCompatActivity {
             public void onResponse(@NonNull Call call, @NonNull Response response) throws IOException {
                    String responseText=response.body().string();
                    Weather weather=Utilty.handleWeatherResponse(responseText);
-                   Log.d("Weather",responseText);
+                    Log.d("Weather",responseText);
                    runOnUiThread(new Runnable() {
                        @Override
                        public void run() {
@@ -171,9 +174,7 @@ public class WeatherActivity extends AppCompatActivity {
                                editor.putString("weather",responseText);
                                editor.apply();
                                showWeatherInfo(weather);
-                               Intent  intent=new Intent(WeatherActivity.this, AutoUpdateService.class);
 
-                                       s
                            }else{
                                Toast.makeText(WeatherActivity.this,"获取天气信息失败",Toast.LENGTH_SHORT).show();
                            }
